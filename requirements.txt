@@ -1,0 +1,16 @@
+yfinance
+pandas
+matplotlib
+scipy
+numpy
+sqlalchemy
+pyyaml
+fastapi
+uvicorn[standard]
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+# psycopg2-binary  # Uncomment to enable PostgreSQL support
+spyne
+six==1.16.0
+lxml
