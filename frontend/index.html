@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wpływ Wydarzeń na Ceny Kryptowalut</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── Login Panel ─────────────────────────────────────────────────────── -->
+<div id="loginPanel" class="d-flex align-items-center justify-content-center vh-100">
+  <div class="card shadow" style="width:360px">
+    <div class="card-body p-4">
+      <h5 class="card-title mb-3 text-center">Logowanie</h5>
+      <div id="loginError" class="alert alert-danger d-none"></div>
+      <div class="mb-3">
+        <label class="form-label">Użytkownik</label>
+        <input id="loginUser" type="text" class="form-control" placeholder="nazwa użytkownika" />
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Hasło</label>
+        <input id="loginPass" type="password" class="form-control" placeholder="hasło" />
+      </div>
+      <button id="btnLogin" class="btn btn-primary w-100">Zaloguj</button>
+      <hr />
+      <p class="text-center text-muted small mb-1">Nie masz konta?</p>
+      <button id="btnRegister" class="btn btn-outline-secondary w-100 btn-sm">Zarejestruj</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Main Panel ──────────────────────────────────────────────────────── -->
+<div id="mainPanel" class="d-none">
+
+  <nav class="navbar navbar-dark bg-dark px-3">
+    <span class="navbar-brand fw-bold">Wpływ Wydarzeń na Ceny Kryptowalut</span>
+    <div class="d-flex align-items-center gap-3">
+      <span id="navUser" class="text-white-50 small"></span>
+      <button id="btnLogout" class="btn btn-outline-light btn-sm">Wyloguj</button>
+    </div>
+  </nav>
+
+  <div class="container-fluid py-3 px-4">
+
+    <!-- Controls -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="row g-2 align-items-end">
+          <div class="col-auto">
+            <label class="form-label mb-1">Kryptowaluta</label>
+            <select id="selCrypto" class="form-select form-select-sm">
+              <option value="BTC">BTC</option>
+              <option value="ETH">ETH</option>
+            </select>
+          </div>
+          <div class="col-auto">
+            <label class="form-label mb-1">Od</label>
+            <input id="fromDate" type="date" class="form-control form-control-sm" value="2020-01-01" />
+          </div>
+          <div class="col-auto">
+            <label class="form-label mb-1">Do</label>
+            <input id="toDate" type="date" class="form-control form-control-sm" value="2022-09-22" />
+          </div>
+          <div class="col-auto">
+            <label class="form-label mb-1">Kategoria</label>
+            <select id="selCategory" class="form-select form-select-sm">
+              <option value="">Wszystkie</option>
+            </select>
+          </div>
+          <div class="col-auto">
+            <button id="btnApply" class="btn btn-primary btn-sm">Zastosuj</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Status -->
+    <div id="statusMsg" class="alert alert-info d-none py-2"></div>
+
+    <!-- Chart -->
+    <div class="card mb-3">
+      <div class="card-header fw-semibold">Wykres ceny z zaznaczonymi wydarzeniami</div>
+      <div class="card-body p-2">
+        <canvas id="priceChart" style="max-height:420px"></canvas>
+      </div>
+    </div>
+
+    <!-- Analysis Charts -->
+    <div id="analysisChartsRow" class="row g-3 mb-3">
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header fw-semibold">Średni zwrot: Dni z wydarzeniami vs kontrolne</div>
+          <div class="card-body p-2">
+            <div id="analysisReturnPlaceholder" class="text-muted text-center py-4 small d-none">
+              Brak danych analizy. Uruchom najpierw <code>main.py</code>.
+            </div>
+            <canvas id="analysisReturnChart" style="max-height:340px"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-header fw-semibold">Istotność statystyczna (p-wartość, Welch t-test)</div>
+          <div class="card-body p-2">
+            <div id="analysisPvalPlaceholder" class="text-muted text-center py-4 small d-none">
+              Brak danych analizy. Uruchom najpierw <code>main.py</code>.
+            </div>
+            <canvas id="analysisPvalChart" style="max-height:340px"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="card mb-3">
+      <div class="card-header fw-semibold d-flex justify-content-between align-items-center">
+        <span>Tabela wydarzeń</span>
+        <span id="tableCount" class="text-muted small"></span>
+      </div>
+      <div class="card-body p-0" style="max-height:400px;overflow-y:auto">
+        <table class="table table-sm table-hover mb-0">
+          <thead class="table-dark sticky-top">
+            <tr>
+              <th>Data</th>
+              <th>Kategoria</th>
+              <th>Tytuł</th>
+              <th class="text-end">Cena (USD)</th>
+              <th class="text-end">Zmiana %</th>
+            </tr>
+          </thead>
+          <tbody id="eventsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Import / Export -->
+    <div class="card">
+      <div class="card-header fw-semibold">Import / Eksport</div>
+      <div class="card-body">
+        <div id="importExportMsg" class="alert d-none mb-3 py-2"></div>
+        <div class="row g-3">
+          <!-- Export -->
+          <div class="col-md-6">
+            <p class="text-muted small mb-2 fw-semibold">EKSPORT</p>
+            <div class="d-flex gap-2">
+              <button id="btnExportJson" class="btn btn-outline-primary btn-sm">
+                Eksport JSON (wydarzenia)
+              </button>
+              <button id="btnExportXml" class="btn btn-outline-secondary btn-sm">
+                Eksport XML (ceny)
+              </button>
+            </div>
+          </div>
+          <!-- Import -->
+          <div class="col-md-6">
+            <p class="text-muted small mb-2 fw-semibold">IMPORT</p>
+            <div class="mb-2 d-flex gap-2 align-items-center">
+              <input id="importXmlFile" type="file" accept=".xml" class="form-control form-control-sm" style="max-width:220px" />
+              <button id="btnImportXml" class="btn btn-outline-secondary btn-sm">Wyślij XML</button>
+            </div>
+            <div class="d-flex gap-2 align-items-center">
+              <input id="importJsonFile" type="file" accept=".json" class="form-control form-control-sm" style="max-width:220px" />
+              <button id="btnImportJson" class="btn btn-outline-secondary btn-sm">Wyślij JSON</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /container -->
+</div><!-- /mainPanel -->
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

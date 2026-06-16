@@ -1,0 +1,28 @@
+body {
+  background: #f5f6fa;
+  font-size: 0.9rem;
+}
+
+.pct-positive {
+  color: #198754;
+  font-weight: 600;
+}
+
+.pct-negative {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+#priceChart {
+  width: 100% !important;
+}
+
+.sticky-top th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.navbar-brand {
+  font-size: 1rem;
+}
